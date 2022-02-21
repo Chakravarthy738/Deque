@@ -1,138 +1,66 @@
-import java.util.Iterator;
+// Queue with two stacks. Implement a queue with two stacks so that each queue operations takes a
+// constant amortized number of stack operations. Hint: If you push elements onto a stack and then 
+// pop them all, they appear in reverse order. If you repeat this process, they're now back in order.
+import java.io.*;
+import java.util.*;
 
-public class Deque<Item> implements Iterable<Item> {
-    private node sentinel;
-    private int size;
-    public Deque()
-    {   // construct an empty deque
-        sentinel = new node (null);
-        sentinel.next = sentinel;
-        sentinel.prev = sentinel;
-        size = 0;
+class Queue {
+    Stack <Integer> stack1=new Stack<Integer>();
+    Stack <Integer> stack2=new Stack<Integer>();
+    private int firstElement;
+
+    public Queue() {
     }
 
-    private class node
-    {   //private inner class
-        Item value;
-        node next;
-        node prev;
-        node (Item value){
-            this.value = value;
-        }
+    // Push element x to the back of queue.
+    public void enqueue(int x) {
+        if (stack1.empty()) firstElement = x;
+        stack1.push(x);
     }
 
-    public boolean isEmpty() {  return size == 0; }                // is the deque empty?{}
-    public int size() { return size; }                    // return the number of items on the deque{}
-    public void addLast(Item item)   // add the item to the front{}
-    {
-        if (item == null)
-            throw new java.lang.IllegalArgumentException("cannot add null to the deque.");
-        else
-        {
-            node newNode = new node(item);
-            newNode.next = sentinel;
-            newNode.prev = sentinel.prev;
-            sentinel.prev.next = newNode;
-            sentinel.prev = newNode;
-            size++;
-        }
-
+    // Removes the element from in front of queue.
+    public int dequeue() {
+        while (!stack1.isEmpty())
+                stack2.push(stack1.pop());
+        int frontElement= stack2.pop(); 
+        while (!stack2.isEmpty())
+                stack1.push(stack2.pop());
+        return frontElement;
     }
-    public void addFirst(Item item)
-    {
-        if (item == null)
-        {
-            throw new java.lang.IllegalArgumentException("Cannot add a null item into this deque!");
-        }
-        else
-        {
-            node newNode = new node(item);
-            newNode.prev = sentinel;
-            newNode.next = sentinel.next;
-            sentinel.next.prev = newNode;
-            sentinel.next = newNode;
-            size++;
-        }
-
+    
+    // Get the front element.
+    public int peek() {
+        return stack1.firstElement();
+    }
+    
+    // Return whether the queue is empty.
+    public boolean empty() {
+        return stack1.isEmpty();
     }
 
-    public Item removeFirst()
-    {   // remove and return the item from the front{}
-        if (size == 0)
-            throw new java.util.NoSuchElementException("the deque is empty, nothing to remove");
-        else
-        {
-            Item tempValue = sentinel.next.value;
-            sentinel.next = sentinel.next.next;
-            sentinel.next.prev = sentinel;
-            return tempValue;
-
-
-        }
+    // Return the number of elements in queue.
+    public int size() {
+        return stack1.size();
     }
-
-    public Item removeLast()
-    {   // remove and return the item from the end{}
-        if (size == 0)
-            throw new java.util.NoSuchElementException("the deque is empty, nothing to remove");
-        else
-        {
-            Item tempValue = sentinel.prev.value;
-            sentinel.prev = sentinel.prev.prev;
-            sentinel.prev.next = sentinel;
-            return tempValue;
+    
+    public static void main(String[] args) throws FileNotFoundException {
+        FileReader f= new FileReader(args[0]);
+        Scanner scan = new Scanner(f);
+        Queue queue = new Queue();
+        int queries = Integer.parseInt(scan.nextLine());
+        for(int i = 0; i < queries; i++) {
+            String input = scan.nextLine();
+            if (input.charAt(0) == '1') {
+                String[] tokens = input.split(" ");
+                queue.enqueue(Integer.parseInt(tokens[1]));
+            } else if (input.charAt(0) == '2') {
+                queue.dequeue();
+            } else if (input.charAt(0) == '3') {
+                System.out.println(queue.peek());
+            } 
         }
+        scan.close();
     }
-
-    private class InnerIterator implements Iterator<Item> {
-        node startingNode = sentinel.next;
-
-        @Override
-        public boolean hasNext()
-        {
-            return startingNode != sentinel;
-        }
-
-        @Override
-        public Item next()
-        {
-            if (!hasNext())
-                throw new java.util.NoSuchElementException("No more element left in the deque!");
-            else
-            {
-                Item temValue = startingNode.value;
-                startingNode = startingNode.next;
-                return temValue;
-            }
-        }
-        @Override
-        public void remove()
-        {
-            throw new java.lang.UnsupportedOperationException("This operation is not supported here.");
-        }
-    }
-    public Iterator<Item> iterator()
-    {   // return an iterator over items in order from front to end
-        InnerIterator iterator = new InnerIterator();
-        return iterator;
-    }
-    public static void main(String[] args)    // unit testing (optional)
-    {
-        Deque<Integer> newdeque = new Deque<>();
-        newdeque.addLast(1);
-        newdeque.addLast(2);
-        newdeque.addLast(3);
-        newdeque.addLast(4);
-        newdeque.removeLast();
-        newdeque.addLast(1);
-        newdeque.addLast(2);
-        newdeque.addLast(3);
-        newdeque.addLast(4);
-        for(int i: newdeque){
-            System.out.print(i+" ");
-        }
-    }
-
-
 }
+
 
